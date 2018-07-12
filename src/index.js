@@ -51,5 +51,5 @@ function start(config, task) {
     rabbitMQListener(config.rabbitMQ, onMessageReceived);
 }
 
-export default {start}
+export {start}
 
