@@ -3,6 +3,10 @@ shell.config.silent = true;
 
 export default function(data) {
     return new Promise(function(resolve, reject) {
-        //write your code here
+        try {
+            // write your code here
+        } catch(e) {
+            reject(e);
+        }
     });
 }

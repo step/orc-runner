@@ -18,7 +18,7 @@ function start(config, task) {
 
     function addExtraData(data) {
         return Object.assign(data, {
-            directory: `./repo/${data.uniqueId}`
+            directory: `./repos/${data.uniqueId}`
         });
     }
 
