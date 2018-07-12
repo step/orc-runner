@@ -8,11 +8,16 @@
     "build": "babel ./src -d dist --presets es2015,stage-2",
     "prepublish": "npm run build"
   },
+  "bin": {
+    "orc-generator": "src/generator.js"
+  },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "amqplib": "^0.5.2",
+    "mustache": "^2.3.0",
     "request": "^2.87.0",
+    "scaffold-generator": "^2.0.3",
     "shelljs": "^0.8.2"
   },
   "devDependencies": {
