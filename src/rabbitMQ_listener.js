@@ -17,7 +17,7 @@ export default function (config, onMessageReceivedCallback) {
     amqp.connect(getRabbitMQServerURL()).then(function (connection) {
         return connection.createChannel();
     }).then(function (channel) {
-        channel.assertExchange(config.exchange, config.exchangeType, {durable: false});
+        channel.assertExchange(config.exchange, config.exchangeType, {durable: true});
         return Promise.all([channel.assertQueue('', {exclusive: true}), channel]);
     }).then(function (args) {
         const q = args[0];
