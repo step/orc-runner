@@ -24,7 +24,5 @@ export function downloadRepository(data) {
     deleteRepoDirectory(data);
     logger.logDownloadingRepo(data.uniqueId, getArchiveLink(), directoryName);
     shell.mkdir(directoryName);
-    shell.cd(directoryName);
-    shell.exec(getCommandToDownloadRepo());
-    shell.cd("../..");
+    shell.exec(getCommandToDownloadRepo(), {cwd: directoryName});
 }
