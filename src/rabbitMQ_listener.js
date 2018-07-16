@@ -14,11 +14,15 @@ export default function (config, onMessageReceivedCallback) {
         return `#.${config.routingKey}.#`;
     }
 
+    function getQueueName() {
+        return `${config.routingKey}_queue`;
+    }
+
     amqp.connect(getRabbitMQServerURL()).then(function (connection) {
         return connection.createChannel();
     }).then(function (channel) {
         channel.assertExchange(config.exchange, config.exchangeType, {durable: true});
-        return Promise.all([channel.assertQueue('', {exclusive: true}), channel]);
+        return Promise.all([channel.assertQueue(getQueueName(), {durable:true}), channel]);
     }).then(function (args) {
         const q = args[0];
         const channel = args[1];
