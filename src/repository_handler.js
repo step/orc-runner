@@ -4,16 +4,16 @@ import logger from "./logger";
 
 export function deleteRepoDirectory(data) {
     const directoryName = data.directory;
-    logger.logDeletingRepoDirectory(data.uniqueId, directoryName);
+    logger.logDeletingRepoDirectory(data.id, directoryName);
     shell.rm("-rf", directoryName);
 }
 
 export function downloadRepository(data) {
 
     function getArchiveLink() {
-        let archiveLink = data.git.repository.archive_url;
+        let archiveLink = data.repository.archive_url;
         archiveLink = archiveLink.replace("{archive_format}", "tarball");
-        return archiveLink.replace("{/ref}", `/${data.git.commit.id}`);
+        return archiveLink.replace("{/ref}", `/${data.commit.id}`);
     }
 
     function getCommandToDownloadRepo() {
@@ -22,7 +22,7 @@ export function downloadRepository(data) {
 
     const directoryName = data.directory;
     deleteRepoDirectory(data);
-    logger.logDownloadingRepo(data.uniqueId, getArchiveLink(), directoryName);
+    logger.logDownloadingRepo(data.id, getArchiveLink(), directoryName);
     shell.mkdir(directoryName);
     shell.exec(getCommandToDownloadRepo(), {cwd: directoryName});
 }

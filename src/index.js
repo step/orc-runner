@@ -1,7 +1,7 @@
 import logger from "./logger";
 import rabbitMQListener from "./rabbitMQ_listener";
 import {downloadRepository, deleteRepoDirectory} from "./repository_handler";
-import sendReports from "./reports_adaptor";
+import sendReport from "./reports_adaptor";
 import {generateSuccessReports, generateFailedReports} from "./reports_handler";
 
 function start(config, task) {
@@ -18,7 +18,10 @@ function start(config, task) {
 
     function addExtraData(data) {
         return Object.assign(data, {
-            directory: `./repos/${data.uniqueId}`
+            directory: `./repos/${data.id}`,
+            job: {
+                start_time: new Date().toString()
+            }
         });
     }
 
@@ -27,22 +30,24 @@ function start(config, task) {
             .then(performTask, logger.logParsingError);
     }
 
-    function onTaskCompleted(data, reports) {
-        logger.logTaskCompleted(data.uniqueId);
+    function onTaskCompleted(data, results) {
+        logger.logTaskCompleted(data.id);
         deleteRepoDirectory(data);
-        sendReports(config.sauron, data, generateSuccessReports(config.agent, data, reports));
+        const report = generateSuccessReports(config.job, data, results);
+        sendReport(config.sauron, data, report);
     }
 
     function onTaskError(data, e) {
         deleteRepoDirectory(data);
-        logger.logTaskFailed(data.uniqueId, e);
-        sendReports(config.sauron, data, generateFailedReports(config.agent, data, e))
+        logger.logTaskFailed(data.id, e);
+        const report = generateFailedReports(config.job, data, e);
+        sendReport(config.sauron, data, report)
     }
 
     function performTask(data) {
         logger.logMessageReceived(data);
         downloadRepository(data);
-        logger.logTaskStarted(data.uniqueId);
+        logger.logTaskStarted(data.id);
         task(data)
             .then(onTaskCompleted.bind(null, data), onTaskError.bind(null, data));
     }

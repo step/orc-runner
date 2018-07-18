@@ -1,5 +1,5 @@
 export default {
-    "agent": {
+    "job": {
         "name": "{{orcName}}"
     },
     "rabbitMQ": {

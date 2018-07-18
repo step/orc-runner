@@ -1,28 +1,25 @@
-function addOrcInfo(data, agent) {
-    return Object.assign(data, {
-        orc: agent
-    });
-}
 
 function currentDateTimeString() {
     return new Date().toString();
 }
 
 
-export function generateSuccessReports(agent, data, taskResults) {
-    const dataWithOrcInfo = addOrcInfo(data, agent);
-    return Object.assign(dataWithOrcInfo, {
-        status: "SUCCESSES",
-        resultsGeneratedAt: currentDateTimeString(),
-        results: taskResults,
+export function generateSuccessReports(job, data, taskResults) {
+    const jobDetails = Object.assign(data.job, {
+        name: job.name,
+        status: "SUCCESS",
+        end_time: currentDateTimeString(),
+        results: taskResults
     });
+    return Object.assign(data, {job: jobDetails});
 }
 
-export function generateFailedReports(agent, data, error) {
-    const dataWithOrcInfo = addOrcInfo(data);
-    return Object.assign(dataWithOrcInfo, {
+export function generateFailedReports(job, data, error) {
+    const jobDetails = Object.assign(data.job, {
+        name: job.name,
         status: "FAILED",
-        failedAt: currentDateTimeString(),
+        end_time: currentDateTimeString(),
         error: error
     });
+    return Object.assign(data, {job: jobDetails});
 }
