@@ -29,7 +29,7 @@ export function downloadRepository(data) {
 
 export function installDependencies(dependencies, data) {
   logger.logInstallingDependencies(data.id);
-  dependencies.forEach(fucntion(dependency) {
+  dependencies.forEach(function(dependency) {
     shell.exec(`npm install ${dependency}`);
   });
 }
