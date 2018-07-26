@@ -49,8 +49,13 @@ function logSendingReportsFailed(id, e) {
     console.error("\t\t", e);
 }
 
+function logInstallingDependencies(id) {
+  console.log(`\t [${id}] [${timestamp()}] Installing dependencies`)
+}
+
 export default {
     logParsingError,
+    logInstallingDependencies,
     logMessageReceived,
     logSendingReports,
     logReportsSent,

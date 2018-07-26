@@ -1,6 +1,6 @@
 import logger from "./logger";
 import rabbitMQListener from "./rabbitMQ_listener";
-import {downloadRepository, deleteRepoDirectory} from "./repository_handler";
+import {downloadRepository, deleteRepoDirectory, installDependencies} from "./repository_handler";
 import sendReport from "./reports_adaptor";
 import {generateSuccessReports, generateFailedReports} from "./reports_handler";
 
@@ -47,6 +47,7 @@ function start(config, task) {
     function performTask(data) {
         logger.logMessageReceived(data);
         downloadRepository(data);
+        installDependencies(cofig.dependencies, data);
         logger.logTaskStarted(data.id);
         task(data)
             .then(onTaskCompleted.bind(null, data), onTaskError.bind(null, data));
@@ -57,4 +58,3 @@ function start(config, task) {
 }
 
 export {start}
-

@@ -26,3 +26,10 @@ export function downloadRepository(data) {
     shell.mkdir(directoryName);
     shell.exec(getCommandToDownloadRepo(), {cwd: directoryName});
 }
+
+export function installDependencies(dependencies, data) {
+  logger.logInstallingDependencies(data.id);
+  dependencies.forEach(fucntion(dependency) {
+    shell.exec(`npm install ${dependency}`);
+  });
+}
