@@ -30,6 +30,6 @@ export function downloadRepository(data) {
 export function installDependencies(dependencies, data) {
   logger.logInstallingDependencies(data.id);
   dependencies.forEach(function(dependency) {
-    shell.exec(`npm install ${dependency}`);
+    shell.exec(`npm install ${dependency}`, {cwd: data.directory});
   });
 }

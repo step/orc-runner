@@ -47,7 +47,7 @@ function start(config, task) {
     function performTask(data) {
         logger.logMessageReceived(data);
         downloadRepository(data);
-        installDependencies(cofig.dependencies, data);
+        installDependencies(config.dependencies, data);
         logger.logTaskStarted(data.id);
         task(data)
             .then(onTaskCompleted.bind(null, data), onTaskError.bind(null, data));
