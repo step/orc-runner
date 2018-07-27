@@ -20,7 +20,7 @@ function start(config, task) {
         return Object.assign(data, {
             directory: `./repos/${data.id}`,
             job: {
-                start_time: new Date().toString()
+                start_time: new Date().toISOString()
             }
         });
     }

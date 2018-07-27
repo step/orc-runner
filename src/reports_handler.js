@@ -1,6 +1,6 @@
 
 function currentDateTimeString() {
-    return new Date().toString();
+    return new Date().toISOString();
 }
 
 
