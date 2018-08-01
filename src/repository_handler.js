@@ -29,6 +29,7 @@ export function downloadRepository(data) {
 
 export function installDependencies(dependencies, data) {
   logger.logInstallingDependencies(data.id);
+  shell.exec("npm install", {cwd: data.directory});
   dependencies.forEach(function(dependency) {
     shell.exec(`npm install ${dependency}`, {cwd: data.directory});
   });
