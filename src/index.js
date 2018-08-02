@@ -32,13 +32,17 @@ function start(config, task) {
 
     function onTaskCompleted(data, results) {
         logger.logTaskCompleted(data.id);
-        deleteRepoDirectory(data);
+        if(!config.debug) {
+            deleteRepoDirectory(config, data);
+        }
         const report = generateSuccessReports(config.job, data, results);
         sendReport(config.sauron, data, report);
     }
 
     function onTaskError(data, e) {
-        deleteRepoDirectory(data);
+        if(!config.debug) {
+            deleteRepoDirectory(config, data);
+        }
         logger.logTaskFailed(data.id, e);
         const report = generateFailedReports(config.job, data, e);
         sendReport(config.sauron, data, report)
@@ -46,8 +50,8 @@ function start(config, task) {
 
     function performTask(data) {
         logger.logMessageReceived(data);
-        downloadRepository(data);
-        installDependencies(config.dependencies, data);
+        downloadRepository(config, data);
+        installDependencies(config, data);
         logger.logTaskStarted(data.id);
         task(data)
             .then(onTaskCompleted.bind(null, data), onTaskError.bind(null, data));
