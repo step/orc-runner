@@ -43,7 +43,8 @@ export default (config, logger) => {
     const installDependencies = (data) => {
         logger.logInstallingDependencies(data.id);
         shell.exec("npm install", {cwd: data.directory});
-        config.dependencies.forEach((dependency) => {
+        const dependencies = config.dependencies || [];
+        dependencies.forEach((dependency) => {
             shell.exec(`npm install ${dependency}`, {cwd: data.directory});
         });
     };
