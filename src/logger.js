@@ -1,60 +1,61 @@
-function timestamp() {
-    return new Date().toISOString();
-}
+const timestamp = () => new Date().toISOString();
 
-function logParsingError(e) {
-    console.error(`[${timestamp()}] Error: Error while parsing message from RabbitMQ\n`);
-    console.error("\t", e);
-}
-
-function logMessageReceived(data) {
+const logMessageReceived = (data) => {
     console.log(`[${data.id}] [${timestamp()}] Received repo :${data.repository.name}, Commit: ${data.commit.id}`);
-}
+};
 
-function logSendingReports(id) {
+const logSendingReports = (id) => {
     console.log(`\t [${id}] [${timestamp()}] Sending reports back`);
-}
+};
 
-function logReportsSent(id) {
-    console.log(`\t [${id}] [${timestamp()}] Reports sent`)
-}
+const logReportsSent = (id) => {
+    console.log(`\t [${id}] [${timestamp()}] Reports sent`);
+};
 
-function logTaskCompleted(id) {
+const logTaskCompleted = (id) => {
     console.log(`\t [${id}] [${timestamp()}] Task execution completed`);
-}
+};
 
-function logTaskFailed(id, e) {
+const logTaskFailed = (id, e) => {
     console.error(`\t [${id}] [${timestamp()}] Error: Error while executing the task\n`);
     console.error("\t\t", e);
-}
+};
 
-function logWaitingMessage(routingKey) {
+const logWaitingMessage = (routingKey) => {
     console.log(`[${timestamp()}] Waiting for ${routingKey} events. To exit press CTRL+C`);
-}
+};
 
-function logDownloadingRepo(id, link, directory) {
-    console.log(`\t [${id}] [${timestamp()}] Downloading repository from ${link} to ${directory}`)
-}
+const logDownloadingRepo = (id, link, directory) => {
+    console.log(`\t [${id}] [${timestamp()}] Downloading repository from ${link} to ${directory}`);
+};
 
-function logDeletingRepoDirectory(id, directory) {
-    console.log(`\t [${id}] [${timestamp()}] Deleting repository directory ${directory}`)
-}
+const logDeletingRepoDirectory = (id, directory) => {
+    console.log(`\t [${id}] [${timestamp()}] Deleting repository directory ${directory}`);
+};
 
-function logTaskStarted(id) {
-    console.log(`\t [${id}] [${timestamp()}] Starting to execute task`)
-}
+const logTaskStarted = (id) => {
+    console.log(`\t [${id}] [${timestamp()}] Starting to execute task`);
+};
 
-function logSendingReportsFailed(id, e) {
-    console.error(`\t [${id}] [${timestamp()}] Error: Error while sending reports back`)
+const logSendingReportsFailed = (id, e) => {
+    console.error(`\t [${id}] [${timestamp()}] Error: Error while sending reports back`);
     console.error("\t\t", e);
-}
+};
 
-function logInstallingDependencies(id) {
-  console.log(`\t [${id}] [${timestamp()}] Installing dependencies`)
-}
+const logInstallingDependencies = (id) => {
+    console.log(`\t [${id}] [${timestamp()}] Installing dependencies`);
+};
+
+const error = (e, data) => {
+    console.error(`\t [${data.id}] [${timestamp()}] Error:`);
+    console.error("\t\t", e);
+};
+
+const logNoDeleteOnDebug = (id, directory) => {
+    console.log(`\t [${id}] [${timestamp()}] Debug Mode: ON, Not deleting the repository directory ${directory}`);
+};
 
 export default {
-    logParsingError,
     logInstallingDependencies,
     logMessageReceived,
     logSendingReports,
@@ -63,7 +64,9 @@ export default {
     logTaskFailed,
     logWaitingMessage,
     logDeletingRepoDirectory,
+    logNoDeleteOnDebug,
     logDownloadingRepo,
     logTaskStarted,
-    logSendingReportsFailed
+    logSendingReportsFailed,
+    error
 }

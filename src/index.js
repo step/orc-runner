@@ -1,64 +1,69 @@
 import logger from "./logger";
 import rabbitMQListener from "./rabbitMQ_listener";
-import {downloadRepository, deleteRepoDirectory, installDependencies} from "./repository_handler";
-import sendReport from "./reports_adaptor";
-import {generateSuccessReports, generateFailedReports} from "./reports_handler";
+import repositoryHandlerGenerator from "./repository_handler";
+import reportHandlerGenerator from "./report_handler";
+import parserGenerator from "./parser";
 
-function start(config, task) {
-    function parseMessage(message) {
-        return new Promise(function (resolve, reject) {
-            try {
-                let data = JSON.parse(message);
-                resolve(addExtraData(data));
-            } catch (e) {
-                reject(e);
-            }
-        });
-    }
+const start = (config, task) => {
+    const parser = parserGenerator(config, logger);
+    const repositoryHandler = repositoryHandlerGenerator(config, logger);
+    const reportHandler = reportHandlerGenerator(config, logger);
 
-    function addExtraData(data) {
-        return Object.assign(data, {
-            directory: `./repos/${data.id}`,
-            job: {
-                start_time: new Date().toISOString()
-            }
-        });
-    }
+    const onMessageReceived = (message) => {
+        let data = {};
 
-    function onMessageReceived(message) {
-        parseMessage(message)
-            .then(performTask, logger.logParsingError);
-    }
+        const setData = (d) => {
+            logger.logMessageReceived(d);
+            data = d;
+        };
 
-    function onTaskCompleted(data, results) {
-        logger.logTaskCompleted(data.id);
-        if(!config.debug) {
-            deleteRepoDirectory(config, data);
-        }
-        const report = generateSuccessReports(config.job, data, results);
-        sendReport(config.sauron, data, report);
-    }
+        const downloadRepo = () => {
+            repositoryHandler.download(data);
+        };
 
-    function onTaskError(data, e) {
-        if(!config.debug) {
-            deleteRepoDirectory(config, data);
-        }
-        logger.logTaskFailed(data.id, e);
-        const report = generateFailedReports(config.job, data, e);
-        sendReport(config.sauron, data, report)
-    }
+        const installDependencies = () => {
+            repositoryHandler.installDependencies(data);
+        };
 
-    function performTask(data) {
-        logger.logMessageReceived(data);
-        downloadRepository(config, data);
-        installDependencies(config, data);
-        logger.logTaskStarted(data.id);
-        task(data)
-            .then(onTaskCompleted.bind(null, data), onTaskError.bind(null, data));
-    }
+        const runTask = () => {
+            logger.logTaskStarted(data.id);
+            return task(data);
+        };
 
+        const generateReportForSuccess = (results) => {
+            logger.logTaskCompleted(data.id);
+            return reportHandler.generateOnSuccess(data, results);
+        };
+
+        const sendReport = (report) => {
+            reportHandler.send(data, report);
+        };
+
+        const removeRepoDir = () => {
+            repositoryHandler.remove(data);
+        };
+
+        const generateReportForFailure = (e) => {
+            logger.logTaskFailed(data.id, e);
+            return reportHandler.generateOnFailure(data, e);
+        };
+
+        const onError = (error) => {
+            logger.error(error, data);
+        };
+
+        parser.parse(message)
+            .then(setData)
+            .then(downloadRepo)
+            .then(installDependencies)
+            .then(runTask)
+            .then(generateReportForSuccess, generateReportForFailure)
+            .then(sendReport)
+            .catch(onError)
+            .then(removeRepoDir);
+    };
 
     rabbitMQListener(config.rabbitMQ, onMessageReceived);
-}
+};
 
 export {start}

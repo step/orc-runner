@@ -1,29 +1,29 @@
-const amqp = require('amqplib');
+import amqp from "amqplib";
 import logger from "./logger";
 
-export default function (config, onMessageReceivedCallback) {
-    function getRabbitMQServerURL() {
+export default (config, onMessageReceivedCallback) => {
+    const getRabbitMQServerURL = () => {
         return `amqp://${config.serverURL}`;
-    }
+    };
 
-    function onMessageReceived(message) {
+    const onMessageReceived = (message) => {
         onMessageReceivedCallback(message.content.toString());
-    }
+    };
 
-    function getRoutingKey() {
+    const getRoutingKey = () => {
         return `#.${config.routingKey}.#`;
-    }
+    };
 
-    function getQueueName() {
+    const getQueueName = () => {
         return `${config.routingKey}_queue`;
-    }
+    };
 
-    amqp.connect(getRabbitMQServerURL()).then(function (connection) {
+    amqp.connect(getRabbitMQServerURL()).then((connection) => {
         return connection.createChannel();
-    }).then(function (channel) {
+    }).then((channel) => {
         channel.assertExchange(config.exchange, config.exchangeType, {durable: true});
-        return Promise.all([channel.assertQueue(getQueueName(), {durable:true}), channel]);
-    }).then(function (args) {
+        return Promise.all([channel.assertQueue(getQueueName(), {durable: true}), channel]);
+    }).then((args) => {
         const q = args[0];
         const channel = args[1];
         logger.logWaitingMessage(config.routingKey);

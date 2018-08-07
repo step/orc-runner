@@ -1,43 +1,56 @@
-const shell = require('shelljs');
-shell.config.silent = true;
-import logger from "./logger";
+import shell from "shelljs";
 
-function setDebugMode(config) {
-    shell.config.silent = !config.debug;
-}
+const getArchiveLink = (data) => {
+    let archiveLink = data.repository.archive_url;
+    archiveLink = archiveLink.replace("{archive_format}", "tarball");
+    return archiveLink.replace("{/ref}", `/${data.commit.id}`);
+};
 
-export function deleteRepoDirectory(config, data) {
-    setDebugMode(config);
+const getCommandToDownloadRepo = (data) => {
+    return `curl -L ${getArchiveLink(data)} | tar xz --strip=1`
+};
+
+const downloadRepository = (data, logger) => {
+    const directoryName = data.directory;
+    deleteRepoDirectory(data, logger);
+    logger.logDownloadingRepo(data.id, getArchiveLink(data), directoryName);
+    shell.mkdir(directoryName);
+    shell.exec(getCommandToDownloadRepo(data), {cwd: directoryName});
+};
+
+const deleteRepoDirectory = (data, logger) => {
     const directoryName = data.directory;
     logger.logDeletingRepoDirectory(data.id, directoryName);
     shell.rm("-rf", directoryName);
-}
+};
 
-export function downloadRepository(config, data) {
+export default (config, logger) => {
+    shell.config.silent = !config.debug;
 
-    function getArchiveLink() {
-        let archiveLink = data.repository.archive_url;
-        archiveLink = archiveLink.replace("{archive_format}", "tarball");
-        return archiveLink.replace("{/ref}", `/${data.commit.id}`);
-    }
+    const download = (data) => {
+        downloadRepository(data, logger);
+    };
 
-    function getCommandToDownloadRepo() {
-        return `curl -L ${getArchiveLink()} | tar xz --strip=1`
-    }
+    const remove = (data) => {
+        if (config.debug) {
+            logger.logNoDeleteOnDebug(data.id, data.directory)
+        } else {
+            deleteRepoDirectory(data, logger);
+        }
+        return data;
+    };
 
-    setDebugMode(config);
-    const directoryName = data.directory;
-    deleteRepoDirectory(config, data);
-    logger.logDownloadingRepo(data.id, getArchiveLink(), directoryName);
-    shell.mkdir(directoryName);
-    shell.exec(getCommandToDownloadRepo(), {cwd: directoryName});
-}
+    const installDependencies = (data) => {
+        logger.logInstallingDependencies(data.id);
+        shell.exec("npm install", {cwd: data.directory});
+        config.dependencies.forEach((dependency) => {
+            shell.exec(`npm install ${dependency}`, {cwd: data.directory});
+        });
+    };
 
-export function installDependencies(config, data) {
-  setDebugMode(config);
-  logger.logInstallingDependencies(data.id);
-  shell.exec("npm install", {cwd: data.directory});
-  config.dependencies.forEach(function(dependency) {
-    shell.exec(`npm install ${dependency}`, {cwd: data.directory});
-  });
-}
+    return {
+        remove,
+        download,
+        installDependencies
+    };
+};
