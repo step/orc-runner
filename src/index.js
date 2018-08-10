@@ -27,7 +27,7 @@ const start = (config, task) => {
 
         const runTask = () => {
             logger.logTaskStarted(data.id);
-            return task(data);
+            return task(data,config.task);
         };
 
         const generateReportForSuccess = (results) => {

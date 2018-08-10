@@ -12,5 +12,8 @@ export default {
         "postReportsUrl": process.env.SAURON_REPORTS_URL || "http://localhost:3010/results"
     },
     "dependencies": [],
-    debug: false
+    "debug": false,
+    "task": {
+      "projects":{}
+    }
 }
