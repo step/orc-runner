@@ -6,9 +6,12 @@ export default (config, onMessageReceivedCallback) => {
     return `amqp://${config.serverURL}`;
   };
 
-  const onMessageReceived = message => {
-    onMessageReceivedCallback(message.content.toString());
-  };
+  const ackToChannel = (channel) => {
+    return (message) => {
+      onMessageReceivedCallback(message.content.toString());
+      channel.ack(message);
+    }
+  }
 
   const getRoutingKey = () => {
     return `#.${config.routingKey}.#`;
@@ -27,6 +30,10 @@ export default (config, onMessageReceivedCallback) => {
       channel.assertExchange(config.exchange, config.exchangeType, {
         durable: true
       });
+      if(config.prefetch) {
+        let prefetchLimit = config.prefetchLimit || 0;
+        channel.prefetch(prefetchLimit);
+      }
       return Promise.all([
         channel.assertQueue(getQueueName(), { durable: true }),
         channel
@@ -37,6 +44,6 @@ export default (config, onMessageReceivedCallback) => {
       const channel = args[1];
       logger.logWaitingMessage(config.routingKey);
       channel.bindQueue(q.queue, config.exchange, getRoutingKey());
-      channel.consume(q.queue, onMessageReceived, { noAck: true });
+      channel.consume(q.queue, ackToChannel(channel), { noAck: false });
     });
 };
