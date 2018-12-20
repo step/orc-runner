@@ -6,12 +6,12 @@ export default (config, onMessageReceivedCallback) => {
     return `amqp://${config.serverURL}`;
   };
 
-  const ackToChannel = (channel) => {
-    return (message) => {
+  const ackToChannel = channel => {
+    return message => {
       onMessageReceivedCallback(message.content.toString());
       channel.ack(message);
-    }
-  }
+    };
+  };
 
   const getRoutingKey = () => {
     return `#.${config.routingKey}.#`;
@@ -30,7 +30,7 @@ export default (config, onMessageReceivedCallback) => {
       channel.assertExchange(config.exchange, config.exchangeType, {
         durable: true
       });
-      if(config.prefetch) {
+      if (config.prefetch) {
         let prefetchLimit = config.prefetchLimit || 0;
         channel.prefetch(prefetchLimit);
       }
